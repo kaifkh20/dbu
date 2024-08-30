@@ -40,7 +40,7 @@ func (config Config) Connect() error {
 		}
 		return nil
 	} else {
-		return errors.New("Invalid SQL Provider")
+		return errors.New("invalid sql provider")
 	}
 }
 
@@ -50,6 +50,6 @@ func InitiateConnection(config Config) {
 		log.Fatal("Unable to Establish Connection\n", err)
 	}
 	fmt.Println("Connection Established")
-	for {
-	}
+	// for {
+	// }
 }
