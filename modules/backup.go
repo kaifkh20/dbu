@@ -20,6 +20,7 @@ type Config struct {
 type Database interface {
 	Connect() (*sql.DB, error)
 	Backup(*sql.DB, string) error
+	Restore(*sql.DB, string) error
 }
 
 func (config Config) Connect() (*sql.DB, error) {
@@ -58,6 +59,25 @@ func (config Config) Backup(db *sql.DB, outputDir string) error {
 	}
 }
 
+func (config Config) Restore(db *sql.DB, inputPath string) error {
+
+	if config.DBProviderName == "mysql" {
+		err := RestoreMYSQL(db, inputPath)
+		if err != nil {
+			return err
+		}
+		return nil
+	} else if config.DBProviderName == "postgres" {
+		err := RestorePSQL(db, inputPath)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
+	return nil
+}
+
 func InitiateConnection(config Config) {
 	db, err := config.Connect()
 	if err != nil {
@@ -68,27 +88,33 @@ func InitiateConnection(config Config) {
 		fmt.Println("1) Backup\n2) Restore(Under-Development)\n3)Type 'exit' to exit.")
 		var choice int
 		fmt.Scanf("%d", &choice)
+		// fmt.Scanln()
 		var err error
 		if choice > 3 {
 			fmt.Println("Invalid choice.")
 		}
 		if choice == 1 {
-			fmt.Println("Specify the path directory.")
+			fmt.Println("Specify the path directory.\n")
 			var outputDir string
-			fmt.Scanf("%s", outputDir)
+			fmt.Scanln("%s", &outputDir)
 			err = config.Backup(db, outputDir)
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Println("Backup done...")
 		} else if choice == 2 {
-			fmt.Println("Specify the path directory.")
-			var outputDir string
-			fmt.Scanf("%s", outputDir)
-			err = config.Backup(db, outputDir)
+			fmt.Println("Specify the path directory of the backup file.\n")
+			var inputPath string
+			fmt.Scanln("%s", &inputPath)
+			fmt.Println("Directory", inputPath)
+			err = config.Restore(db, inputPath)
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Println("Restoration done.")
 
 		} else {
 			os.Exit(0)
 		}
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Println("Backup done...")
 	}
 }

@@ -1,6 +1,7 @@
 package modules
 
 import (
+	"bufio"
 	"database/sql"
 	"fmt"
 	"os"
@@ -145,4 +146,40 @@ func dumpTable(db *sql.DB, file *os.File, table string) error {
 
 func escapeString(s string) string {
 	return strings.NewReplacer("'", "''", "\\", "\\\\").Replace(s)
+}
+
+func RestoreMYSQL(db *sql.DB, inputPath string) error {
+	file, err := os.Open(inputPath)
+	if err != nil {
+		return err
+	}
+
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	var statement strings.Builder
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		if strings.HasPrefix("line", "--") || strings.TrimSpace(line) == "" {
+			continue
+		}
+
+		statement.WriteString(line)
+		statement.WriteString(" ")
+
+		if strings.HasSuffix(strings.TrimSpace(line), ";") {
+			_, err := db.Exec(statement.String())
+			if err != nil {
+				return fmt.Errorf("Error executing SQL Statements : %v \n %s", err, statement.String())
+			}
+			statement.Reset()
+		}
+	}
+
+	if err = scanner.Err(); err != nil {
+		return fmt.Errorf("Error Reading The File specified at the input path %s :%v", inputPath, err)
+	}
+
+	return nil
 }
