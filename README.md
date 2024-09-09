@@ -5,7 +5,7 @@
 
 <h1>Features to implement</h1>
 
-- [] Custom dump for Relational Databases.
-- [] Wide range of database support.
-- [] Nosql Database Support.
-- [] Better docs.
+- [ ] Custom dump for Relational Databases.
+- [ ] Wide range of database support.
+- [ ] Nosql Database Support.
+- [ ] Better docs.
