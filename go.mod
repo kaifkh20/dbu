@@ -4,9 +4,11 @@ go 1.22.2
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
+	github.com/JCoupalK/go-pgdump v1.0.3 // indirect
 	github.com/akamensky/argparse v1.4.0 // indirect
 	github.com/go-sql-driver/mysql v1.8.1 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
+	github.com/jamf/go-mysqldump v0.8.1 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/lib/pq v1.10.9 // indirect
 	github.com/montanaflynn/stats v0.7.1 // indirect

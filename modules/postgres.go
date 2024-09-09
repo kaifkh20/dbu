@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/JCoupalK/go-pgdump"
 	_ "github.com/lib/pq"
 )
 
@@ -32,26 +33,20 @@ func ConnectPSQL(config Config) (*sql.DB, error) {
 	return db, nil
 }
 
-func BackupPSQL(db *sql.DB, outputDir string) error {
+func BackupPSQL(db *sql.DB, outputDir string, config Config) error {
+
 	timestamp := time.Now().Format("2006-01-02_15-04-05")
 	fileName := fmt.Sprintf("psql_backup_%s.sql", timestamp)
 	filePath := filepath.Join(outputDir, fileName)
 
-	file, err := os.Create(filePath)
-	if err != nil {
-		return fmt.Errorf("error creating backup file :%v", err)
-	}
-	defer file.Close()
+	connStr := "user=" + config.User + "password=" + config.Password + "host=" + config.Host + "port=" + strconv.Itoa(config.Port) + "dbname=" + config.Database
+	// db, err := sql.Open("postgres", connStr)
 
-	tables, err := getTable(db)
-	if err != nil {
-		return err
-	}
+	dumper := pgdump.NewDumper(connStr)
 
-	for _, table := range tables {
-		if err := dumpTable(db, file, table); err != nil {
-			return fmt.Errorf("error dumping table %s: %v", table, err)
-		}
+	if err := dumper.DumpDatabase(filePath); err != nil {
+		os.Remove(filePath)
+		return fmt.Errorf("error backing up database : %v", err)
 	}
 
 	return nil

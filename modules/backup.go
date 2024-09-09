@@ -49,7 +49,7 @@ func (config Config) Backup(db *sql.DB, outputDir string) error {
 		}
 		return nil
 	} else if config.DBProviderName == "postgres" {
-		err := BackupPSQL(db, outputDir)
+		err := BackupPSQL(db, outputDir, config)
 		if err != nil {
 			return err
 		}
@@ -89,30 +89,40 @@ func InitiateConnection(config Config) {
 		var choice int
 		fmt.Scanf("%d", &choice)
 		// fmt.Scanln()
-		var err error
+		// var err error
 		if choice > 3 {
 			fmt.Println("Invalid choice.")
 		}
+
 		if choice == 1 {
-			fmt.Println("Specify the path directory.\n")
+			fmt.Print("Specify the path directory: ")
 			var outputDir string
-			fmt.Scanln("%s", &outputDir)
+			// Corrected input handling
+			_, err := fmt.Scanln(&outputDir) // Removed the format specifier
+			if err != nil {
+				log.Fatal(err) // Handle any input errors
+			}
+
 			err = config.Backup(db, outputDir)
 			if err != nil {
 				log.Fatal(err)
 			}
 			fmt.Println("Backup done...")
 		} else if choice == 2 {
-			fmt.Println("Specify the path directory of the backup file.\n")
+			fmt.Print("Specify the path directory of the backup file: ")
 			var inputPath string
-			fmt.Scanln("%s", &inputPath)
-			fmt.Println("Directory", inputPath)
+			// Corrected input handling
+			_, err := fmt.Scanln(&inputPath) // Removed the format specifier
+			if err != nil {
+				log.Fatal(err) // Handle any input errors
+			}
+
+			fmt.Println("Directory:", inputPath)
 			err = config.Restore(db, inputPath)
 			if err != nil {
 				log.Fatal(err)
 			}
 			fmt.Println("Restoration done.")
-
 		} else {
 			os.Exit(0)
 		}
