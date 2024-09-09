@@ -12,7 +12,7 @@ import (
 func main() {
 	parser := argparse.NewParser("dbu", "Backup your database")
 
-	nameofdb := parser.Selector("n", "name", []string{"mysql", "postgres", "mongodb"}, &argparse.Options{Required: true, Help: "Specify the DB Provider"})
+	nameofdb := parser.Selector("n", "name", []string{"mysql", "postgres"}, &argparse.Options{Required: true, Help: "Specify the DB Provider"})
 
 	host := parser.String("", "host", &argparse.Options{Required: true, Help: "Host Name"})
 
