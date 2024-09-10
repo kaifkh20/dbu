@@ -65,7 +65,7 @@ func RestorePSQL(db *sql.DB, inputPath string) error {
 
 	for scanner.Scan() {
 		line := scanner.Text()
-		if strings.HasPrefix("line", "--") || strings.TrimSpace(line) == "" {
+		if strings.HasPrefix(line, "--") || strings.TrimSpace(line) == "" || strings.HasPrefix(line, "/*") || strings.HasSuffix(line, "*/;") {
 			continue
 		}
 
@@ -75,14 +75,14 @@ func RestorePSQL(db *sql.DB, inputPath string) error {
 		if strings.HasSuffix(strings.TrimSpace(line), ";") {
 			_, err := db.Exec(statement.String())
 			if err != nil {
-				return fmt.Errorf("Error executing SQL Statements : %v \n %s", err, statement.String())
+				return fmt.Errorf("error executing sql statements : %v \n %s", err, statement.String())
 			}
 			statement.Reset()
 		}
 	}
 
 	if err = scanner.Err(); err != nil {
-		return fmt.Errorf("Error Reading The File specified at the input path %s :%v", inputPath, err)
+		return fmt.Errorf("error reading the file specified at the input path %s :%v", inputPath, err)
 	}
 
 	return nil

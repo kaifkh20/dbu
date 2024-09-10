@@ -85,7 +85,7 @@ func InitiateConnection(config Config) {
 	}
 	fmt.Println("Connection Established")
 	for {
-		fmt.Println("1) Backup\n2) Restore(Under-Development)\n3)Type 'exit' to exit.")
+		fmt.Println("1) Backup\n2) Restore(Under-Development)\n3)To exit.")
 		var choice int
 		fmt.Scanf("%d", &choice)
 		// fmt.Scanln()

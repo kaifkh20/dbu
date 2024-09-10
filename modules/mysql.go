@@ -69,7 +69,7 @@ func RestoreMYSQL(db *sql.DB, inputPath string) error {
 
 	for scanner.Scan() {
 		line := scanner.Text()
-		if strings.HasPrefix("line", "--") || strings.TrimSpace(line) == "" {
+		if strings.HasPrefix(line, "--") || strings.TrimSpace(line) == "" || strings.ContainsAny(line, "/*") || strings.HasSuffix(line, "*/;") {
 			continue
 		}
 
