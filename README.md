@@ -9,3 +9,6 @@
 - [ ] Wide range of database support.
 - [ ] Nosql Database Support.
 - [ ] Better docs.
+
+<h3>Contributions are welcomed. :-)</h3>
+<p>Report any bugs or request any new feature.</p>
