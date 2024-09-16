@@ -21,6 +21,7 @@ type Database interface {
 	Connect() (*sql.DB, error)
 	Backup(*sql.DB, string) error
 	Restore(*sql.DB, string) error
+	BackupCloud(*sql.DB,int) error
 }
 
 func (config Config) Connect() (*sql.DB, error) {
@@ -53,12 +54,9 @@ func (config Config) Backup(db *sql.DB, outputDir string) error {
 		if err != nil {
 			return err
 		}
-		return nil
-	} else {
-		return errors.New("invalid sql provider")
+		return nil	
 	}
 }
-
 func (config Config) Restore(db *sql.DB, inputPath string) error {
 
 	if config.DBProviderName == "mysql" {
@@ -78,6 +76,17 @@ func (config Config) Restore(db *sql.DB, inputPath string) error {
 	return nil
 }
 
+func (config Config) BackupCloud(db *sql.DB,choice int) error{
+	if choice==1{
+
+	} else if choice==2{
+		fmt.Println("Not implemented yet. Under-development")
+		return fmt.Errof("not implemented yet")
+	} else {
+		fmt.Println("Invalid choice")
+	}
+}
+
 func InitiateConnection(config Config) {
 	db, err := config.Connect()
 	if err != nil {
@@ -85,12 +94,12 @@ func InitiateConnection(config Config) {
 	}
 	fmt.Println("Connection Established")
 	for {
-		fmt.Println("1) Backup\n2) Restore(Under-Development)\n3)To exit.")
+		fmt.Println("1) Backup\n2) Restore\n3) Backup On Cloud\n4) To exit.")
 		var choice int
 		fmt.Scanf("%d", &choice)
 		// fmt.Scanln()
 		// var err error
-		if choice > 3 {
+		if choice > 4 || choice < 1 {
 			fmt.Println("Invalid choice.")
 		}
 
@@ -123,6 +132,16 @@ func InitiateConnection(config Config) {
 				log.Fatal(err)
 			}
 			fmt.Println("Restoration done.")
+		} else if choice==3 {
+			fmt.Print("Enter the cloud provider\n")
+			var choice_provider int
+			fmt.Print("1) AWS\n 2)GCP\n")
+			fmt.Scanf("%d",&choice_provider)
+			err := config.BackupCloud(db,choice_provider)
+			if err!=nil{
+				log.Fatal(err)
+			}
+			fmt.Println("Backup saved to cloud.")
 		} else {
 			os.Exit(0)
 		}
