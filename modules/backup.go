@@ -1,6 +1,7 @@
 package modules
 
 import (
+	""
 	"database/sql"
 	"errors"
 	"fmt"
@@ -77,10 +78,10 @@ func (config Config) Restore(db *sql.DB, inputPath string) error {
 }
 
 func (config Config) BackupCloud(db *sql.DB,choice int) error{
+	config.Backup(db,"backup_cloud")
 	if choice==1{
-
+		
 	} else if choice==2{
-		fmt.Println("Not implemented yet. Under-development")
 		return fmt.Errof("not implemented yet")
 	} else {
 		fmt.Println("Invalid choice")
