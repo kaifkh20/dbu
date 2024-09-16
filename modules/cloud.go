@@ -68,6 +68,8 @@ func getUserInput(prompt string) error{
 func uploadFileToCloud() error{
 	ctx := context.Background()
 	
+	Backup()
+
 	remoteFilePath := getUserInput("Enter the desired remote file path: ")
 	providerStr := getUserInput("Enter the cloud provider (AWS or GCP): ")
 
