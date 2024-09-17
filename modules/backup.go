@@ -78,15 +78,13 @@ func (config Config) Restore(db *sql.DB, inputPath string) error {
 	return nil
 }
 
-func (config Config) BackupCloud(db *sql.DB,choice int) error{
+func (config Config) BackupCloud(db *sql.DB) error{
 	filePath,err:=config.Backup(db,"backup_cloud")
-	if choice==1{
-		
-	} else if choice==2{
-		return fmt.Errorf("not implemented yet")
-	} else {
-		fmt.Println("Invalid choice")
+	if err!=nil{
+		return err
 	}
+	err=UploadFileToCloud(filePath)	
+	return err
 }
 
 func InitiateConnection(config Config) {
@@ -135,11 +133,7 @@ func InitiateConnection(config Config) {
 			}
 			fmt.Println("Restoration done.")
 		} else if choice==3 {
-			fmt.Print("Enter the cloud provider\n")
-			var choice_provider int
-			fmt.Print("1) AWS\n 2)GCP\n")
-			fmt.Scanf("%d",&choice_provider)
-			err := config.BackupCloud(db,choice_provider)
+			err := config.BackupCloud(db)
 			if err!=nil{
 				log.Fatal(err)
 			}

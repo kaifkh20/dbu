@@ -2,7 +2,9 @@ package modules
 
 import (
   "context"
-  "log"
+  "fmt"
+  "strings"
+  "os"
   "github.com/aws/aws-sdk-go-v2/aws"
   "github.com/aws/aws-sdk-go-v2/config"
   "github.com/aws/aws-sdk-go-v2/service/s3"
@@ -25,10 +27,25 @@ type AWSStorageClient struct{
 	bucket string
 }
 
-func NewAWSStorageClient(ctx contenxt.Context,accessKeyID,secretAccessKey,region,bucket string)(*AWSStorageClient, error){
-	cfg,err := config.LoadDefaultConfig(ctx.TODO())
+func NewAWSStorageClientLoadDefault(ctx context.Context,bucket string) (*AWSStorageClient,error){
+	cfg,err := config.LoadDefaultConfig(ctx)
 	if err!=nil{
-		return nil,fmt.Errof("failed to load shared config, set up or try another options : %v",err);
+		return nil,fmt.Errorf("failed to load shared config, set up or try another options : %v",err);
+	}
+	
+	client := s3.NewFromConfig(cfg)
+
+	return &AWSStorageClient{
+		S3Client : client,
+		bucket : bucket,
+	},nil
+	
+}
+
+func NewAWSStorageClient(ctx context.Context,accessKeyID,secretAccessKey,region,bucket string)(*AWSStorageClient, error){
+	cfg,err := config.LoadDefaultConfig(ctx)
+	if err!=nil{
+		return nil,fmt.Errorf("failed to load shared config, set up or try another options : %v",err);
 	}
 	
 	client := s3.NewFromConfig(cfg)
@@ -47,31 +64,30 @@ func (a *AWSStorageClient) UploadFile(ctx context.Context,localFilePath,remoteFi
 	}
 	defer file.Close()
 
-	_,err := a.S3Client.PutObject(ctx,&s3.PutObjectInput{
+	_,err = a.S3Client.PutObject(ctx,&s3.PutObjectInput{
 		Bucket : aws.String(a.bucket),
 		Key : aws.String(remoteFilePath),
 		Body : file,
 	})
 	
 	if err!=nil{
-		return fmt.Errof("failed to upload file : %v",err)
+		return fmt.Errorf("failed to upload file : %v",err)
 	}
 
 	return nil
 }
 
-func getUserInput(prompt string) error{
+func getUserInput(prompt string) string{
 	fmt.Print(prompt)
 	var input string
 	fmt.Scanln(&input)
 	return strings.TrimSpace(input)
 }
 
-func uploadFileToCloud() error{
+func UploadFileToCloud(localFilePath string) error{
 	ctx := context.Background()
 	
-	filePath,err := Backup()
-
+	
 	remoteFilePath := getUserInput("Enter the desired remote file path: ")
 	providerStr := getUserInput("Enter the cloud provider (AWS or GCP): ")
 
@@ -80,14 +96,23 @@ func uploadFileToCloud() error{
 
 	switch strings.ToUpper(providerStr) {
 	case "AWS":
-		accessKeyID := getUserInput("Enter AWS Access Key ID: ")
-		secretAccessKey := getUserInput("Enter AWS Secret Access Key: ")
-		region := getUserInput("Enter AWS Region: ")
-		bucket := getUserInput("Enter S3 Bucket Name: ")
+		default_or_specified := getUserInput("1) Load Default Config or 2) Specify the config details")
+		if default_or_specified == "1" {
+			bucket := getUserInput("Enter S3 Bucket Name:")
+			client,err=NewAWSStorageClientLoadDefault(ctx,bucket)
+			if err!=nil{
+				return fmt.Errorf("failed to create AWS client : %v",err)
+			}
+		} else{
+			accessKeyID := getUserInput("Enter AWS Access Key ID: ")
+			secretAccessKey := getUserInput("Enter AWS Secret Access Key: ")
+			region := getUserInput("Enter AWS Region: ")
+			bucket := getUserInput("Enter S3 Bucket Name: ")
 
-		client, err = NewAWSStorageClient(ctx, accessKeyID, secretAccessKey, region, bucket)
-		if err != nil {
-			return fmt.Errorf("failed to create AWS client: %v", err)
+			client, err = NewAWSStorageClient(ctx, accessKeyID, secretAccessKey, region, bucket)
+			if err != nil {
+				return fmt.Errorf("failed to create AWS client: %v", err)
+			}
 		}
 /*
 	case "GCP":
