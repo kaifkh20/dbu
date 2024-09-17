@@ -1,7 +1,6 @@
 package modules
 
 import (
-	""
 	"database/sql"
 	"errors"
 	"fmt"
