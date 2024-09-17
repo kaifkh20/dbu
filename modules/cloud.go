@@ -3,16 +3,18 @@ package modules
 import (
   "context"
   "log"
- // "github.com/aws/aws-sdk-go-v2/config"
+  "github.com/aws/aws-sdk-go-v2/aws"
+  "github.com/aws/aws-sdk-go-v2/config"
+  "github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
 type CloudProvider int
 
 
 const (
-	AWS CloudProvider iota
+	AWS CloudProvider =  iota
 	GCP
-)
+);
 
 type CloudStorageClient interface{
 	UploadFile(ctx context.Context,localFilePath string,remoteFilePath string) error
@@ -33,7 +35,7 @@ func NewAWSStorageClient(ctx contenxt.Context,accessKeyID,secretAccessKey,region
 
 	return &AWSStorageClient{
 		S3Client : client,
-		bucket : bucket
+		bucket : bucket,
 	},nil
 	
 }
@@ -48,7 +50,7 @@ func (a *AWSStorageClient) UploadFile(ctx context.Context,localFilePath,remoteFi
 	_,err := a.S3Client.PutObject(ctx,&s3.PutObjectInput{
 		Bucket : aws.String(a.bucket),
 		Key : aws.String(remoteFilePath),
-		Body : file
+		Body : file,
 	})
 	
 	if err!=nil{
@@ -68,7 +70,7 @@ func getUserInput(prompt string) error{
 func uploadFileToCloud() error{
 	ctx := context.Background()
 	
-	Backup()
+	filePath,err := Backup()
 
 	remoteFilePath := getUserInput("Enter the desired remote file path: ")
 	providerStr := getUserInput("Enter the cloud provider (AWS or GCP): ")

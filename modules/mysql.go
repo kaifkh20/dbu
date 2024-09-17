@@ -35,7 +35,7 @@ func ConnectMySQL(config Config) (*sql.DB, error) {
 	return db, nil
 }
 
-func BackupMYSQL(db *sql.DB, outputDir string) error {
+func BackupMYSQL(db *sql.DB, outputDir string) (string,error) {
 
 	timestamp := time.Now().Format("2006-01-02_15-04-05")
 	fileName := fmt.Sprintf("mysql_backup_%s", timestamp)
@@ -43,17 +43,17 @@ func BackupMYSQL(db *sql.DB, outputDir string) error {
 	dumper, err := mysqldump.Register(db, outputDir, fileName)
 
 	if err != nil {
-		return err
+		return "" , err
 	}
 
 	err = dumper.Dump()
 
 	if err != nil {
-		return fmt.Errorf("error backuping : %v", err)
+		return "",fmt.Errorf("error backuping : %v", err)
 	}
 
 	defer dumper.Close()
-	return nil
+	return fileName,nil
 }
 
 func RestoreMYSQL(db *sql.DB, inputPath string) error {

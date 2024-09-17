@@ -19,8 +19,8 @@ type Config struct {
 
 type Database interface {
 	Connect() (*sql.DB, error)
-	Backup(*sql.DB, string) error
-	Restore(*sql.DB, string) error
+	Backup(*sql.DB, string) (string, error)
+	Restore(*sql.DB, string) (string, error)
 	BackupCloud(*sql.DB,int) error
 }
 
@@ -42,20 +42,22 @@ func (config Config) Connect() (*sql.DB, error) {
 	}
 }
 
-func (config Config) Backup(db *sql.DB, outputDir string) error {
+func (config Config) Backup(db *sql.DB, outputDir string) (string,error) {
 	if config.DBProviderName == "mysql" {
-		err := BackupMYSQL(db, outputDir)
+		filePath,err := BackupMYSQL(db, outputDir)
 		if err != nil {
-			return err
+			return "",err
 		}
-		return nil
+		return filePath,nil
 	} else if config.DBProviderName == "postgres" {
-		err := BackupPSQL(db, outputDir, config)
+		filePath,err := BackupPSQL(db, outputDir, config)
 		if err != nil {
-			return err
+			return "",err
 		}
-		return nil	
+		return filePath,nil	
 	}
+	return "",fmt.Errorf("invalid provider")
+	
 }
 func (config Config) Restore(db *sql.DB, inputPath string) error {
 
@@ -77,11 +79,11 @@ func (config Config) Restore(db *sql.DB, inputPath string) error {
 }
 
 func (config Config) BackupCloud(db *sql.DB,choice int) error{
-	config.Backup(db,"backup_cloud")
+	filePath,err:=config.Backup(db,"backup_cloud")
 	if choice==1{
 		
 	} else if choice==2{
-		return fmt.Errof("not implemented yet")
+		return fmt.Errorf("not implemented yet")
 	} else {
 		fmt.Println("Invalid choice")
 	}
@@ -112,7 +114,7 @@ func InitiateConnection(config Config) {
 				log.Fatal(err) // Handle any input errors
 			}
 
-			err = config.Backup(db, outputDir)
+			_,err = config.Backup(db, outputDir)
 			if err != nil {
 				log.Fatal(err)
 			}

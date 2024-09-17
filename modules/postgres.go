@@ -33,7 +33,7 @@ func ConnectPSQL(config Config) (*sql.DB, error) {
 	return db, nil
 }
 
-func BackupPSQL(db *sql.DB, outputDir string, config Config) error {
+func BackupPSQL(db *sql.DB, outputDir string, config Config) (string,error) {
 
 	timestamp := time.Now().Format("2006-01-02_15-04-05")
 	fileName := fmt.Sprintf("psql_backup_%s.sql", timestamp)
@@ -46,10 +46,10 @@ func BackupPSQL(db *sql.DB, outputDir string, config Config) error {
 
 	if err := dumper.DumpDatabase(filePath); err != nil {
 		os.Remove(filePath)
-		return fmt.Errorf("error backing up database : %v", err)
+		return "",fmt.Errorf("error backing up database : %v", err)
 	}
 
-	return nil
+	return filePath,nil
 }
 
 func RestorePSQL(db *sql.DB, inputPath string) error {
